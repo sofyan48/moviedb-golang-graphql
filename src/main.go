@@ -1,12 +1,11 @@
 package main
 
-import "fmt"
-
-import "github.com/graphql-go/graphql"
-
-import "log"
-
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/graphql-go/graphql"
+	"log"
+)
 
 func main() {
 	fields := graphql.Fields{
