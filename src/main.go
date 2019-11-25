@@ -12,10 +12,9 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/graphql", handler.GraphqlHandler)
-
 	graphiqlHandler, _ := graphiql.NewGraphiqlHandler("/graphql")
 
+	http.HandleFunc("/graphql", handler.GraphqlHandler)
 	http.Handle("/graphiql", graphiqlHandler)
 
 	godotenvError := godotenv.Load()
