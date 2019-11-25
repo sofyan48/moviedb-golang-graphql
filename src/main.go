@@ -7,9 +7,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/friendsofgo/graphiql"
 	"github.com/graphql-go/graphql"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -29,19 +31,19 @@ func main() {
 	schema, _ := graphql.NewSchema(schemaConfig)
 
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+		body, bodyError := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 
-		if err != nil {
-			log.Fatalln("Error", err)
+		if bodyError != nil {
+			log.Fatalln("Error", bodyError)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		var apolloQuery map[string]interface{}
+		var storageQuery map[string]interface{}
 
-		json.Unmarshal(body, &apolloQuery)
+		json.Unmarshal(body, &storageQuery)
 
-		query := apolloQuery["query"]
+		query := storageQuery["query"]
 
 		params := graphql.Params{
 			Schema:        schema,
@@ -57,13 +59,22 @@ func main() {
 		json.NewEncoder(w).Encode(result)
 	})
 
-	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/graphql")
+	graphiqlHandler, graphiqlError := graphiql.NewGraphiqlHandler("/graphql")
 
-	if err != nil {
-		panic(err)
+	if graphiqlError != nil {
+		panic(graphiqlError)
 	}
 
 	http.Handle("/graphiql", graphiqlHandler)
 
-	http.ListenAndServe(":8080", nil)
+	godotenvError := godotenv.Load()
+
+	if godotenvError != nil {
+		panic(godotenvError)
+	}
+
+	port := os.Getenv("PORT")
+	host := os.Getenv("HOST")
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), nil))
 }
