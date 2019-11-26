@@ -1,0 +1,10 @@
+version: '3'
+services:
+  moviedb:
+    image: meongbego/moviedb
+    ports:
+      - "8080:8080"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+    command: ./main -e production
